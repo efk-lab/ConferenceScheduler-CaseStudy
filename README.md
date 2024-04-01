@@ -93,17 +93,17 @@ Greedy algorithm is used to schedule conference. Greedy algorithms are a class o
     >kubectl exec <AppPodName> -n conference-scheduler-k8s -- tail -1000f /mnt/k8s/log/ConferenceScheduler.log
 
 # DB Connection
--  To access DB:
-  - List the pods with command below and copy the MongoDB pod name
-    >kubectl get pods -n conference-scheduler-k8s
-  - Then update the command below with PodName and run
-    >kubectl exec -it <MongDBPodName>-n conference-scheduler-k8s -- mongosh -u user -p user
+- To access DB:
+    - List the pods with command below and copy the MongoDB pod name
+      >kubectl get pods -n conference-scheduler-k8s
+    - Then update the command below with PodName and run
+      >kubectl exec -it <MongDBPodName>-n conference-scheduler-k8s -- mongosh -u user -p user
 - Run the commands below to list the DB collections
     >db.conference.find();
     >db.user.find();
 
 # Rest Api Test
--  Find the test requests xml under /Postman directory and import it from Postman.
+-  Find the test requests xml under /Postman directory and import it from Postman. (Security configurations are ready)
 
 - Spring Security OAuth2 is used for Endpoint security. To make rest api calls, firstly call the UserRegistryServis via [http://127.0.0.1:8080/fleetManager/signInService/signIn](http://127.0.0.1:8081/conference-scheduler/sign-up) and register an user with email and password.
 
@@ -112,23 +112,23 @@ Greedy algorithm is used to schedule conference. Greedy algorithms are a class o
 - The registered email and password is used to create access token:
   - Postman ->New request -> Authorization tab ->
 
-      Type = Oauth2
+        Type = Oauth2
     
-      Grant type = password
+        Grant type = password
     
-      Access Token URL = http://localhost:8081/oauth/token
+        Access Token URL = http://localhost:8081/oauth/token
     
-      Client ID = ConferenceSchedulerClient
+        Client ID = ConferenceSchedulerClient
     
-      Client Secret = secret
+        Client Secret = secret
     
-      Username = user@conferencescheduler.com (Note:Registered in the previous step)
+        Username = user@conferencescheduler.com (Note:Registered in the previous step)
     
-      Password = ••••••• (Note:Created in the previous step)
+        Password = ••••••• (Note:Created in the previous step)
     
-      Scope = write
+        Scope = write
     
-      Client Authentication = Send as Basic Auth Header
+        Client Authentication = Send as Basic Auth Header
     
   - Press "Get New Access Token". Now token is created and added to request.
   - Each access token validity period is 12 hours.
