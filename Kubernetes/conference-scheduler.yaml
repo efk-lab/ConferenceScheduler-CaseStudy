@@ -1,0 +1,320 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: conference-scheduler-k8s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-conference-scheduler-configmap
+  namespace: conference-scheduler-k8s
+data:
+  database_url: mongodb-conference-scheduler-service
+  mongo-root-username: user
+  mongo-root-authdb: admin
+  mongo-database: test
+  auto-index-creation: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-conference-scheduler-secret
+  namespace: conference-scheduler-k8s
+type: Opaque
+stringData:
+  mongo-root-password: user
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-conference-scheduler-service
+  namespace: conference-scheduler-k8s
+spec:
+  selector:
+    app: mongodb-conference-scheduler
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-conference-scheduler-deployment
+  namespace: conference-scheduler-k8s
+  labels:
+    app: mongodb-conference-scheduler
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 2
+  selector:
+    matchLabels:
+      app: mongodb-conference-scheduler
+  template:
+    metadata:
+      labels:
+        app: mongodb-conference-scheduler
+    spec:
+      containers:
+      - name: mongodb-conference-scheduler
+        image: mongo
+        ports:
+          - containerPort: 27017   
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-conference-scheduler-configmap
+                key: mongo-root-username
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-conference-scheduler-secret
+                key: mongo-root-password
+        volumeMounts:
+          - mountPath: conference-scheduler/data/db
+            name: mongo-conference-scheduler-pv
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+      volumes:
+        - name: mongo-conference-scheduler-pv
+          persistentVolumeClaim:
+            claimName: mongo-conference-scheduler-pvc
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-conference-scheduler-pv
+  namespace: conference-scheduler-k8s
+  labels:
+    app: mongodb-conference-scheduler
+spec:
+  capacity:
+    storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: standard
+  hostPath:
+    path: /mnt/k8s/mongo
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-conference-scheduler-pvc
+  namespace: conference-scheduler-k8s
+spec:
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels: 
+      app: mongodb-conference-scheduler
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conference-scheduler-configmap
+  namespace: conference-scheduler-k8s
+data:
+  security-jwt-clientid: ConferenceSchedulerClient
+  security-jwt-accesstokenvaliditityseconds: "43200"
+  security-jwt-authorizedgranttypes: password,authorization_code,refresh_token,client_credentials
+  security-jwt-refreshtokenvalidityseconds: "2592000"
+  admin-user-email: admin@conferencescheduler.com
+  system-user-email: system@conferencescheduler.com
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: conference-scheduler-secret
+  namespace: conference-scheduler-k8s
+type: Opaque
+stringData:
+  security-jwt-clientsecret: secret
+  security-jwt-signingkey: "123"
+  redis-password: root
+  admin-user-password: admin123
+  system-user-password: system123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conference-scheduler-service
+  namespace: conference-scheduler-k8s
+  labels:
+     app: conference-scheduler
+spec:
+  selector:
+    app: conference-scheduler
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 32577
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conference-scheduler-deployment
+  namespace: conference-scheduler-k8s
+  labels:
+    app: conference-scheduler
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: conference-scheduler
+  template:
+    metadata:
+      labels:
+        app: conference-scheduler
+    spec:
+      containers:
+      - name: conference-scheduler
+        image: eftmk/conferencescheduler:latest
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 8081
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+        volumeMounts:
+          - mountPath: /mnt/k8s/log
+            name: conference-scheduler-pv
+        env:
+          - name: CONFIG_MONGODB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-conference-scheduler-configmap
+                key: mongo-root-username
+          - name: CONFIG_MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-conference-scheduler-secret
+                key: mongo-root-password
+          - name: CONFIG_MONGODB_AUTH_DB
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-conference-scheduler-configmap
+                key: mongo-root-authdb
+          - name: CONFIG_MONGODB_SERVER
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-conference-scheduler-configmap
+                key: database_url
+          - name: CONFIG_MONGODB_AUTO_INDEX_CREATION
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-conference-scheduler-configmap
+                key: auto-index-creation
+          - name: CONFIG_SECURITY_JWT_CLIENTID
+            valueFrom:
+              configMapKeyRef:
+                name: conference-scheduler-configmap
+                key: security-jwt-clientid
+          - name: CONFIG_SECURITY_JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: conference-scheduler-secret
+                key: security-jwt-clientsecret
+          - name: CONFIG_SECURITY_JWT_SIGNINGKEY
+            valueFrom:
+              secretKeyRef:
+                name: conference-scheduler-secret
+                key: security-jwt-signingkey
+          - name: CONFIG_SECURITY_JWT_ACCESSTOKEN_VALIDITYSECONDS
+            valueFrom:
+              configMapKeyRef:
+                name: conference-scheduler-configmap
+                key: security-jwt-accesstokenvaliditityseconds
+          - name: CONFIG_SECURITY_JWT_AUTHORIZED_GRANTTYPES
+            valueFrom:
+              configMapKeyRef:
+                name: conference-scheduler-configmap
+                key: security-jwt-authorizedgranttypes
+          - name: CONFIG_SECURITY_JWT_REFERSHTOKEN_VALIDITYSECONDS
+            valueFrom:
+              configMapKeyRef:
+                name: conference-scheduler-configmap
+                key: security-jwt-refreshtokenvalidityseconds
+          - name: CONFIG_ADMIN_USER_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                name: conference-scheduler-configmap
+                key: admin-user-email
+          - name: CONFIG_ADMIN_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: conference-scheduler-secret
+                key: admin-user-password
+          - name: CONFIG_SYSTEM_USER_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                name: conference-scheduler-configmap
+                key: system-user-email
+          - name: CONFIG_SYSTEM_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: conference-scheduler-secret
+                key: system-user-password
+      volumes:
+        - name: conference-scheduler-pv
+          persistentVolumeClaim:
+            claimName: conference-scheduler-pvc
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: conference-scheduler-pv
+  namespace: conference-scheduler-k8s
+  labels:
+    app: conference-scheduler
+spec:
+  capacity:
+    storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: standard
+  hostPath:
+    path: /mnt/k8s/log
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: conference-scheduler-pvc
+  namespace: conference-scheduler-k8s
+spec:
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels: 
+      app: conference-scheduler

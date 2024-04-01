@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "16ea07f4-a1cd-4e3e-a393-056551c2145c",
+		"name": "ConferenceScheduler",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2110232"
+	},
+	"item": [
+		{
+			"name": "UserRegistryService-signUp",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"user@conferencescheduler.com\",\n  \"password\": \"user123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8081/conference-scheduler/sign-up",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8081",
+					"path": [
+						"conference-scheduler",
+						"sign-up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ConferenceSchedulerService-scheduleConference",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "http://localhost:8081/oauth/token",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user@conferencescheduler.com",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "ConferenceSchedulerClient",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "user123",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "password_credentials",
+							"type": "string"
+						},
+						{
+							"key": "scope",
+							"value": "write",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "queryParams",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "useBrowser",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://oauth.pstmn.io/v1/browser-callback",
+							"type": "string"
+						},
+						{
+							"key": "authUrl",
+							"value": "http://localhost:8080/login/oauth/authorize",
+							"type": "string"
+						},
+						{
+							"key": "client_authentication",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "tokenName",
+							"value": "mytoken",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "secret",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"conferenceEventRequests\": [\n        {\n            \"eventName\": \"Architecting Your Codebase\",\n            \"eventDuration\": 60\n        },\n        {\n            \"eventName\": \"Overdoing it in Python\",\n            \"eventDuration\": 45\n        },\n        {\n            \"eventName\": \"Flavors of Concurrency in Java\",\n            \"eventDuration\": 30\n        },\n        {\n            \"eventName\": \"Ruby Errors from Mismatched Gem Versions\",\n            \"eventDuration\": 45\n        },\n        {\n            \"eventName\": \"JUnit 5 - Shaping the Future of Testing on the JVM\",\n            \"eventDuration\": 45\n        },\n        {\n            \"eventName\": \"Cloud Native Java lightning\"\n        },\n        {\n            \"eventName\": \"Communicating Over Distance\",\n            \"eventDuration\": 60\n        },\n        {\n            \"eventName\": \"AWS Technical Essentials\",\n            \"eventDuration\": 45\n        },\n        {\n            \"eventName\": \"Continuous Delivery\",\n            \"eventDuration\": 30\n        },\n        {\n            \"eventName\": \"Monitoring Reactive Applications\",\n            \"eventDuration\": 30\n        },\n        {\n            \"eventName\": \"Pair Programming vs Noise\",\n            \"eventDuration\": 45\n        },\n        {\n            \"eventName\": \"Rails Magic\",\n            \"eventDuration\": 60\n        },\n        {\n            \"eventName\": \"Microservices \\\"Just Right\\\"\",\n            \"eventDuration\": 60\n        },\n        {\n            \"eventName\": \"Clojure Ate Scala (on my project)\",\n            \"eventDuration\": 45\n        },\n        {\n            \"eventName\": \"Perfect Scalability\",\n            \"eventDuration\": 30\n        },\n        {\n            \"eventName\": \"Apache Spark\",\n            \"eventDuration\": 30\n        },\n        {\n            \"eventName\": \"Async Testing on JVM\",\n            \"eventDuration\": 60\n        },\n        {\n            \"eventName\": \"A World Without HackerNews\",\n            \"eventDuration\": 30\n        },\n        {\n            \"eventName\": \"User Interface CSS in Apps\",\n            \"eventDuration\": 30\n        }\n    ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8081/conference-scheduler/conference",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8081",
+					"path": [
+						"conference-scheduler",
+						"conference"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ConferenceSchedulerService-getConference",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "http://localhost:8080/oauth/token",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user@conferencescheduler.com",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "ConferenceSchedulerClient",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "user123",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "password_credentials",
+							"type": "string"
+						},
+						{
+							"key": "scope",
+							"value": "write",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "queryParams",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "useBrowser",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "https://oauth.pstmn.io/v1/browser-callback",
+							"type": "string"
+						},
+						{
+							"key": "authUrl",
+							"value": "http://localhost:8080/login/oauth/authorize",
+							"type": "string"
+						},
+						{
+							"key": "client_authentication",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "tokenName",
+							"value": "mytoken",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "secret",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"conferenceId\": \"660841b110d6590c7c1218ef\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/conference-scheduler/conference-details",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"conference-scheduler",
+						"conference-details"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
