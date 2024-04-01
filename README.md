@@ -34,7 +34,7 @@ Greedy algorithm is used to schedule conference. Greedy algorithms are a class o
 
 - Run the commands below to build Image
 
-  >docker build -t bookworm:latest -f /eclipse-workspace/BookWorm/src/main/resources/Dockerfile .
+  >docker build -t eftmk/conferencescheduler:latest -f /ConferenceScheduler/src/main/resources/Dockerfile .
   >
   >eval $(minikube docker-env)
 
@@ -88,11 +88,11 @@ Greedy algorithm is used to schedule conference. Greedy algorithms are a class o
 
 - To access the log file: 
   - List the pods with command below and copy the app pod name
-    >kubectl get pods -n fleetmanagement-k8s
+    >kubectl get pods -n conference-scheduler-k8s
   - Then update the command below with PodName and run
     >kubectl exec <AppPodName> -n conference-scheduler-k8s -- tail -1000f /mnt/k8s/log/ConferenceScheduler.log
 
-# DB Connection
+# DB Access
 - To access DB:
     - List the pods with command below and copy the MongoDB pod name
       >kubectl get pods -n conference-scheduler-k8s
@@ -100,12 +100,13 @@ Greedy algorithm is used to schedule conference. Greedy algorithms are a class o
       >kubectl exec -it <MongDBPodName>-n conference-scheduler-k8s -- mongosh -u user -p user
 - Run the commands below to list the DB collections
     >db.conference.find();
+    >
     >db.user.find();
 
 # Rest Api Test
 -  Find the test requests xml under /Postman directory and import it from Postman. (Security configurations are ready)
 
-- Spring Security OAuth2 is used for Endpoint security. To make rest api calls, firstly call the UserRegistryServis via [http://127.0.0.1:8080/fleetManager/signInService/signIn](http://127.0.0.1:8081/conference-scheduler/sign-up) and register an user with email and password.
+- Spring Security OAuth2 is used for Endpoint security. To make rest api calls, firstly call the UserRegistryServis via http://127.0.0.1:8081/conference-scheduler/sign-up and register an user with email and password.
 
 - After that, all rest calls must be added an access token.
   
